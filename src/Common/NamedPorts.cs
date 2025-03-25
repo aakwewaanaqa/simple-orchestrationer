@@ -1,5 +1,5 @@
 namespace Root.Common;
 
-public struct ConventionPorts {
+public struct NamedPorts {
     public const uint LLAMA3 = 11434;
 }

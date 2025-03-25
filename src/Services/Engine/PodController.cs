@@ -19,20 +19,20 @@ HostPortController _hostPortController) {
                 int deployedCount = 0;
                 for (int i = 0; i < s.Replicas; i++) {
                     var pipe = await
-                        (_hostPortController.OpenPort, podKey)
-                       .Start()
-                       .Function(openPortResponse => openPortResponse
-                           .As(new RunArgs {
-                                IsRemoveOnStop = true,
-                                ImageTag = s.ImageTag,
-                                GpuCount = s.GpuCount,
-                                PortMap = new PortMap {
-                                    ContainerPort = s.ContainerPortMap,
-                                    HostPort      = openPortResponse.value,
-                                },
-                            }, default))
-                       .Pass(_docker.RunContainer)
-                       .ToTask();
+                        Pipe.Start(podKey)
+                            .Pass(_hostPortController.OpenPort)
+                            .Function(openPortResponse => openPortResponse
+                                .As(new RunArgs {
+                                     IsRemoveOnStop = true,
+                                     ImageTag       = s.ImageTag,
+                                     GpuCount       = s.GpuCount,
+                                     PortMap = new PortMap {
+                                         ContainerPort = s.ContainerPortMap,
+                                         HostPort      = openPortResponse.value,
+                                     },
+                                 }, default))
+                            .Pass(_docker.RunContainer)
+                            .ToTask();
 
                     if (pipe.IsNotOk) continue;
 
@@ -55,7 +55,7 @@ HostPortController _hostPortController) {
                     errorCode = ErrorCode.OK,
                     value     = deployedCount,
                 };
-            
+
             default:
                 return new Response<int> {
                     status    = (int)HttpStatusCode.InternalServerError,

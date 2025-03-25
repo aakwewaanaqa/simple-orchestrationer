@@ -11,8 +11,8 @@ public class Llama3Controller(DockerWrapper _docker) {
                 IsRemoveOnStop = true,
                 GpuCount       = -1,
                 PortMap = new PortMap {
-                    ContainerPort = ConventionPorts.LLAMA3,
-                    HostPort      = ConventionPorts.LLAMA3,
+                    ContainerPort = NamedPorts.LLAMA3,
+                    HostPort      = NamedPorts.LLAMA3,
                 }
             }
         };

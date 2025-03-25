@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simple-orchestrationer", "simple-orchestrationer.csproj", "{E7425DF3-3C0C-4199-8058-CFAC38AD4D52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{B007ED02-B724-44AC-BB0E-CF972B3213D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{E7425DF3-3C0C-4199-8058-CFAC38AD4D52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7425DF3-3C0C-4199-8058-CFAC38AD4D52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7425DF3-3C0C-4199-8058-CFAC38AD4D52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B007ED02-B724-44AC-BB0E-CF972B3213D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B007ED02-B724-44AC-BB0E-CF972B3213D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B007ED02-B724-44AC-BB0E-CF972B3213D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B007ED02-B724-44AC-BB0E-CF972B3213D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
