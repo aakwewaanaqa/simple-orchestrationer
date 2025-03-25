@@ -20,10 +20,10 @@ public class PressureTests {
     [Test]
     public async Task RunContainer_And_CallGenerateAPI() {
         var runArgs = new RunArgs {
-            Image    = "ponito/built-llama3",
-            Name     = "llama3_test",
-            GpuCount = -1,
-            PortMap  = new PortMap { HostPort = 11434, ContainerPort = 11434 }
+            Image   = "ponito/built-llama3",
+            Name    = "llama3_test",
+            UseGpu  = true,
+            PortMap = new PortMap { HostPort = 11434, ContainerPort = 11434 }
         };
         string api = "/api/generate";
         object jsonData = new {

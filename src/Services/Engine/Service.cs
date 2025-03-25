@@ -24,7 +24,7 @@ public readonly struct Service : IPodKey {
     public int Replicas { get; init; }
     
     /// <summary>
-    ///     <see cref="RunArgs.GpuCount"/> 
+    ///     <see cref="RunArgs.UseGpu"/> 
     /// </summary>
     public int GpuCount { get; init; }
 

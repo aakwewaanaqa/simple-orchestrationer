@@ -18,7 +18,7 @@
     protected override async Task OnInitializedAsync() {
         var runArgs = Response<RunArgs>.Ok(new RunArgs {
             IsRemoveOnStop = true,
-            GpuCount       = -1,
+            UseGpu       = true,
             Image       = "ponito/built-llama3",
             PortMap = new PortMap {
                 HostPort      = NamedPorts.LLAMA3,

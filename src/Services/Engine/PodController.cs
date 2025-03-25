@@ -24,8 +24,8 @@ HostPortController _hostPortController) {
                             .Function(openPortResponse => openPortResponse
                                 .As(new RunArgs {
                                      IsRemoveOnStop = true,
-                                     Image       = s.ImageTag,
-                                     GpuCount       = s.GpuCount,
+                                     Image          = s.ImageTag,
+                                     UseGpu         = true,
                                      PortMap = new PortMap {
                                          ContainerPort = s.ContainerPortMap,
                                          HostPort      = openPortResponse.value,

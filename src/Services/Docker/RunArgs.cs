@@ -24,7 +24,7 @@ public readonly struct RunArgs {
     ///     to input --gpus or not.
     ///     Lets the container use host's gpu.
     /// </summary>
-    public int GpuCount { get; init; }
+    public bool UseGpu { get; init; }
 
     /// <summary>
     ///     to input --name or not.
@@ -57,9 +57,8 @@ public readonly struct RunArgs {
         var builder = new StringBuilder();
         if (IS_DETACHED) builder.Append(" -d");
         if (IsRemoveOnStop) builder.Append(" --rm");
-        if (GpuCount != 0) {
-            if (GpuCount < 0) builder.Append(" --gpus=all");
-            else builder.Append($" --gpus={GpuCount}");
+        if (UseGpu) {
+            builder.Append(" --gpus=all");
         }
 
         if (Name != null) builder.Append($" --name=\"{Name}\"");

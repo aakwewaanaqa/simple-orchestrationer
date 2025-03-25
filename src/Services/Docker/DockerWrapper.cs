@@ -50,9 +50,9 @@ DockerClient _client) : IDisposable {
     /// </summary>
     /// <param name="args"><see cref="RunArgs"/></param>
     public Convert<Response<RunArgs>, Response<ContainerWrapper>> RunContainer =>
-        async argsResponse => {
-            if (argsResponse.IsNotOk) return argsResponse.As<ContainerWrapper>();
-            var args = argsResponse.value;
+        async argRsp => {
+            if (argRsp.IsNotOk) return argRsp.As<ContainerWrapper>();
+            var args = argRsp.value;
 
             try {
                 var response = await _client.Containers.CreateContainerAsync(new CreateContainerParameters {
@@ -67,8 +67,8 @@ DockerClient _client) : IDisposable {
                             }
                             : null,
                         PublishAllPorts = args.PortMap.HasHost,
-                        AutoRemove      = true,
-                        Runtime         = "nvidia",
+                        AutoRemove      = args.IsRemoveOnStop,
+                        Runtime         = args.UseGpu ? "nvidia" : null,
                     },
                     ExposedPorts = args.PortMap.HasHost
                         ? new Dictionary<string, EmptyStruct> {
