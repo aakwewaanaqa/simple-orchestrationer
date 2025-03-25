@@ -1,8 +1,16 @@
+using Docker.DotNet;
 using Root.Components;
+using Root.Services.Docker;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpClient();
+
+builder.Services
+       .AddSingleton(new DockerClientConfiguration().CreateClient())
+       .AddTransient<DockerWrapper>();
+
 builder.Services.AddRazorComponents()
        .AddInteractiveServerComponents();
 

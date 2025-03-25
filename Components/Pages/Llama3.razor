@@ -1,0 +1,83 @@
+@page "/llama3"
+@using System.Text
+@using Newtonsoft.Json
+@using Root.Services.Docker
+@rendermode InteractiveServer
+
+@code {
+
+    [Inject] public IJSRuntime    Js     { get; set; }
+    [Inject] public DockerWrapper Docker { get; set; }
+
+    private bool             isProcessing;
+    private ContainerWrapper container;
+    private string           rsp;
+
+    private async Task AskLlama3() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        var runArgs = Response<RunArgs>.Ok(new RunArgs {
+            IsRemoveOnStop = true,
+            GpuCount       = -1,
+            ImageTag       = "ponito/built-llama3",
+            PortMap = new PortMap {
+                HostPort      = NamedPorts.LLAMA3,
+                ContainerPort = NamedPorts.LLAMA3,
+            }
+        });
+
+        string endpoint = "/api/generate";
+
+        object postData = new {
+            model  = "llama3",
+            prompt = "Read me a story~",
+            stream = false
+        };
+
+        await Pipe
+              .Start(runArgs)
+              .Pass(Docker.RunContainer)
+              .Function(ctnRsp => {
+                  container = ctnRsp.value;
+                  rsp       = "產生中。。。";
+                  StateHasChanged();
+                  return (ctnRsp, endpoint, postData);
+              })
+              .Pass(Docker.Post)
+              .FunctionAsync(async postRsp => {
+                  if (postRsp.IsNotOk) {
+                      rsp          = $"失敗了：{postRsp.errorCode}：{postRsp.message}";
+                      isProcessing = false;
+                      StateHasChanged();
+                      return Response<ContainerWrapper>.Ok(container);
+                  }
+
+                  await using var stream = await postRsp.value.Content.ReadAsStreamAsync();
+                  using var       reader = new StreamReader(stream);
+                  while (!reader.EndOfStream) {
+                      string json = await reader.ReadToEndAsync();
+                      dynamic obj = JsonConvert.DeserializeObject(json);
+                      rsp = obj?.response;
+                      StateHasChanged();
+                  }
+
+                  return Response<ContainerWrapper>.Ok(container);
+              })
+              .Function(ctnRsp => ctnRsp.value?.Stop())
+              .ToTask();
+
+        isProcessing = false;
+    }
+
+}
+
+<PageTitle>Llama3</PageTitle>
+<button @onclick="AskLlama3">Read me a story.</button>
+<p id="rsp">@rsp</p>
+
+<script>
+    function appendRsp(str) {
+        window.document.getElementById('rsp').innerText += str;
+    }
+</script>

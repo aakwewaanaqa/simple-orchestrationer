@@ -14,12 +14,13 @@ public class PressureTests {
 
     [SetUp]
     public void Setup() {
+        
         _stopWatch = new Stopwatch();
         _stopWatch.Start();
 
-        _docker = new DockerWrapper(
-        _http,
-        new DockerClientConfiguration().CreateClient());
+//        _docker = new DockerWrapper(
+//        _http,
+//        new DockerClientConfiguration().CreateClient());
 
         _http = new HttpClient {
             Timeout = TimeSpan.FromMinutes(10)

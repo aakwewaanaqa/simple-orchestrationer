@@ -9,8 +9,8 @@ namespace Root.Services.Docker;
 ///     Docker services wrapped inside a wrapper.
 /// </summary>
 public class DockerWrapper(
-HttpClient   _http,
-DockerClient _client) : IDisposable {
+IHttpClientFactory _httpFactory,
+DockerClient       _client) : IDisposable {
     /// <summary>
     ///     Creates a container.
     /// </summary>
@@ -49,23 +49,18 @@ DockerClient _client) : IDisposable {
                         Id = message.Trim(),
                         HostUrl = args.PortMap.HasHost
                             ? $"http://localhost:{args.PortMap.HostPort}"
-                            : null,
-                        InnerIp =
-                            (await _client
-                                  .Containers
-                                  .InspectContainerAsync(message.Trim())
-                                  .Guard()
-                            ).NetworkSettings.IPAddress,
+                            : null
                     }
             };
         };
-
-    public Convert<(Response<ContainerWrapper>, object), Response<HttpResponseMessage>> Post
+    
+    public Convert<(Response<ContainerWrapper>, string, object), Response<HttpResponseMessage>> Post
         => async tuple => {
-            (var ctnRsp, object rawObj) = tuple;
+            (var ctnRsp, string endpoint, object rawObj) = tuple;
             if (ctnRsp.IsNotOk) return ctnRsp.As<HttpResponseMessage>();
-            string url          = ctnRsp.value.HostUrl;
-            var    httpResponse = await _http.PostAsJsonAsync(url, rawObj);
+            string url          = ctnRsp.value.HostUrl + endpoint;
+            var http = _httpFactory.CreateClient();
+            var    httpResponse = await http.PostAsJsonAsync(url, rawObj);
             bool   httpIsOk     = httpResponse.IsSuccessStatusCode;
             return new Response<HttpResponseMessage> {
                 status = (int)httpResponse.StatusCode,
