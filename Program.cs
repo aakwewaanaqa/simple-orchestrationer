@@ -1,4 +1,4 @@
-using simple_orchestrationer.Components;
+using Root.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

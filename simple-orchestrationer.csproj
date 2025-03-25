@@ -2,11 +2,25 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>simple-orchestrationer</RootNamespace>
+        <RootNamespace>Root</RootNamespace>
         <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Docker.DotNet" Version="3.125.15"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Using Include="Root"/>
+        <Using Include="Root.Common"/>
+        <Using Include="Root.Components"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Remove="tests"/>
+    </ItemGroup>
+    
 </Project>
