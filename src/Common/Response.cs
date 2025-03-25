@@ -1,4 +1,6 @@
-﻿namespace Root.Common;
+﻿using System.Net;
+
+namespace Root.Common;
 
 /// <summary>
 ///     資料庫固定回應格式。
@@ -113,6 +115,14 @@ public struct Response<T> {
             errorCode = (int)errorCode,
             message   = message,
             value     = default,
+        };
+    }
+
+    public static implicit operator Response<T>(T value) {
+        return new Response<T> {
+            status    = 200,
+            errorCode = 0,
+            value     = value
         };
     }
 }

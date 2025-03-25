@@ -24,7 +24,7 @@ HostPortController _hostPortController) {
                             .Function(openPortResponse => openPortResponse
                                 .As(new RunArgs {
                                      IsRemoveOnStop = true,
-                                     ImageTag       = s.ImageTag,
+                                     Image       = s.ImageTag,
                                      GpuCount       = s.GpuCount,
                                      PortMap = new PortMap {
                                          ContainerPort = s.ContainerPortMap,
@@ -47,7 +47,7 @@ HostPortController _hostPortController) {
                 if (deployedCount == 0)
                     return new Response<int> {
                         status    = (int)HttpStatusCode.ExpectationFailed,
-                        errorCode = ErrorCode.CREATE_CONTAINER_FAIL,
+                        errorCode = ErrorCode.RUN_CONTAINER_FAIL,
                     };
 
                 return new Response<int> {

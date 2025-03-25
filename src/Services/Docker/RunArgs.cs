@@ -51,7 +51,7 @@ public readonly struct RunArgs {
     ///     Tags the running container a new tag to push as an image,
     ///     and it works like a repo's name of github.
     /// </summary>
-    public string ImageTag { get; init; }
+    public string Image { get; init; }
 
     public override string ToString() {
         var builder = new StringBuilder();
@@ -65,7 +65,7 @@ public readonly struct RunArgs {
         if (Name != null) builder.Append($" --name=\"{Name}\"");
         if (PortMap.HasHost) builder.Append($" -p {PortMap}");
         if (PortExposing != null) builder.Append($" --expose={PortExposing}");
-        builder.Append($" \"{ImageTag}\"");
+        builder.Append($" \"{Image}\"");
         return builder.ToString();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using Docker.DotNet;
+using Docker.DotNet.Models;
 using Root.Common;
 
 namespace Root.Services.Docker;
@@ -9,10 +10,43 @@ namespace Root.Services.Docker;
 ///     Docker services wrapped inside a wrapper.
 /// </summary>
 public class DockerWrapper(
-IHttpClientFactory _httpFactory,
-DockerClient       _client) : IDisposable {
+HttpClient   _http,
+DockerClient _client) : IDisposable {
     /// <summary>
-    ///     Creates a container.
+    ///     Gets a container by <see cref="SearchArgs"/>.
+    /// </summary>
+    public Convert<Response<SearchArgs>, Response<ContainerListResponse>> GetContainer =>
+        async argRsp => {
+            try {
+                var containers =
+                    await _client.Containers.ListContainersAsync(new ContainersListParameters { All = true });
+                var matchedContainers = containers.Where(c => c.Image == argRsp.value.Image).ToList();
+
+                if (!matchedContainers.Any()) {
+                    return new Response<ContainerListResponse> {
+                        status    = (int)HttpStatusCode.NotFound,
+                        errorCode = ErrorCode.GET_CONTAINER_FAIL,
+                        message   = "No matching container found."
+                    };
+                }
+
+                return new Response<ContainerListResponse> {
+                    status    = (int)HttpStatusCode.OK,
+                    errorCode = ErrorCode.OK,
+                    value     = matchedContainers.First()
+                };
+            }
+            catch (Exception ex) {
+                return new Response<ContainerListResponse> {
+                    status    = (int)HttpStatusCode.InternalServerError,
+                    errorCode = ErrorCode.UNKNOWN_ERROR,
+                    message   = ex.Message,
+                };
+            }
+        };
+
+    /// <summary>
+    ///     Creates a container using Docker.DotNet.
     /// </summary>
     /// <param name="args"><see cref="RunArgs"/></param>
     public Convert<Response<RunArgs>, Response<ContainerWrapper>> RunContainer =>
@@ -20,47 +54,56 @@ DockerClient       _client) : IDisposable {
             if (argsResponse.IsNotOk) return argsResponse.As<ContainerWrapper>();
             var args = argsResponse.value;
 
-            var startInfo = new ProcessStartInfo {
-                FileName               = "docker",
-                Arguments              = $"container run {args}",
-                RedirectStandardOutput = true,
-                RedirectStandardError  = true,
-            };
-            var process = Process.Start(startInfo);
+            try {
+                var response = await _client.Containers.CreateContainerAsync(new CreateContainerParameters {
+                    Image = args.Image,
+                    Name  = args.Name,
+                    HostConfig = new HostConfig {
+                        PortBindings = args.PortMap.HasHost
+                            ? new Dictionary<string, IList<PortBinding>> {
+                                [$"{args.PortMap.ContainerPort}/tcp"] = new List<PortBinding> {
+                                    new() { HostPort = args.PortMap.HostPort.ToString() }
+                                }
+                            }
+                            : null,
+                        PublishAllPorts = args.PortMap.HasHost,
+                        AutoRemove      = true,
+                        Runtime         = "nvidia",
+                    },
+                    ExposedPorts = args.PortMap.HasHost
+                        ? new Dictionary<string, EmptyStruct> {
+                            [$"{args.PortMap.ContainerPort}/tcp"] = new()
+                        }
+                        : null,
+                });
 
-            if (RunArgs.IS_DETACHED) await process.WaitForExitAsync();
-            string error   = await process.StandardError.ReadToEndAsync();
-            string message = await process.StandardOutput.ReadToEndAsync();
+                await _client.Containers.StartContainerAsync(response.ID, new ContainerStartParameters());
 
-            if (!string.IsNullOrEmpty(error)) {
                 return new Response<ContainerWrapper> {
-                    status    = (int)HttpStatusCode.InternalServerError,
-                    errorCode = ErrorCode.CREATE_CONTAINER_FAIL,
-                    message   = error,
+                    status    = (int)HttpStatusCode.OK,
+                    errorCode = ErrorCode.OK,
+                    message   = "Container created and started successfully.",
+                    value = new ContainerWrapper {
+                        Id      = response.ID,
+                        HostUrl = args.PortMap.HasHost ? $"http://localhost:{args.PortMap.HostPort}" : null
+                    }
                 };
             }
-
-            return new Response<ContainerWrapper> {
-                status    = (int)HttpStatusCode.OK,
-                errorCode = ErrorCode.OK,
-                message   = message,
-                value =
-                    new ContainerWrapper {
-                        Id = message.Trim(),
-                        HostUrl = args.PortMap.HasHost
-                            ? $"http://localhost:{args.PortMap.HostPort}"
-                            : null
-                    }
-            };
+            catch (Exception ex) {
+                return new Response<ContainerWrapper> {
+                    status    = (int)HttpStatusCode.InternalServerError,
+                    errorCode = ErrorCode.RUN_CONTAINER_FAIL,
+                    message   = ex.Message,
+                };
+            }
         };
-    
+
     public Convert<(Response<ContainerWrapper>, string, object), Response<HttpResponseMessage>> Post
         => async tuple => {
             (var ctnRsp, string endpoint, object rawObj) = tuple;
             if (ctnRsp.IsNotOk) return ctnRsp.As<HttpResponseMessage>();
             string url          = ctnRsp.value.HostUrl + endpoint;
-            var http = _httpFactory.CreateClient();
-            var    httpResponse = await http.PostAsJsonAsync(url, rawObj);
+            var    httpResponse = await _http.PostAsJsonAsync(url, rawObj);
             bool   httpIsOk     = httpResponse.IsSuccessStatusCode;
             return new Response<HttpResponseMessage> {
                 status = (int)httpResponse.StatusCode,
@@ -74,7 +117,7 @@ DockerClient       _client) : IDisposable {
 
     public void Dispose() {
         // Do not do this, because it is handled by Di
-        // _http?.Dispose();
+        _http?.Dispose();
         _client?.Dispose();
         GC.SuppressFinalize(this);
     }

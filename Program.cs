@@ -5,7 +5,7 @@ using Root.Services.Docker;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<DockerWrapper>();
 
 builder.Services
        .AddSingleton(new DockerClientConfiguration().CreateClient())
