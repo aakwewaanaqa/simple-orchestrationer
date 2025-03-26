@@ -3,6 +3,6 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AMessagePumpStrategy_002Ecs_002Fl_003AC_0021_003FUsers_003FUSER_003FAppData_003FRoaming_003FJetBrains_003FRider2024_002E3_003Fresharper_002Dhost_003FDecompilerCache_003Fdecompiler_003F53539022a55f40bd95b3200c33b231c074e00_003F43_003F6e5d7bd5_003FMessagePumpStrategy_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4b70c7e1_002D866a_002D468d_002D8515_002Dde667a63bdd0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="RunContainer_And_CallGenerateAPI" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B007ED02-B724-44AC-BB0E-CF972B3213D8::net9.0::Tests.PressureTests.RunContainer_And_CallGenerateAPI&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B007ED02-B724-44AC-BB0E-CF972B3213D8::net9.0::Tests.PressureTests.Run_Get_Post&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -1,5 +1,5 @@
 namespace Root.Services.Docker;
 
-public readonly struct SearchArgs {
+public readonly struct GetArgs {
     public string Image { get; init; }
 }

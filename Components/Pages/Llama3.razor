@@ -9,44 +9,31 @@
     [Inject] public IJSRuntime    Js     { get; set; }
     [Inject] public DockerWrapper Docker { get; set; }
 
-    private bool                       isInitialized;
-    private string                     prompt;
-    private bool                       isProcessing;
-    private Response<ContainerWrapper> ctnRsp;
-    private string                     rsp;
-
-    protected override async Task OnInitializedAsync() {
-        var runArgs = Response<RunArgs>.Ok(new RunArgs {
-            IsRemoveOnStop = true,
-            UseGpu       = true,
-            Image       = "ponito/built-llama3",
-            PortMap = new PortMap {
-                HostPort      = NamedPorts.LLAMA3,
-                ContainerPort = NamedPorts.LLAMA3,
-            }
-        });
-        var pipe = await
-            Pipe.Start(runArgs)
-                 .Pass(Docker.RunContainer)
-                 .ToTask();
-
-        if (pipe.IsNotOk) return;
-        ctnRsp = pipe;
-    }
+    private bool   isInitialized;
+    private string prompt;
+    private bool   isProcessing;
+    private string rsp;
 
     private async Task AskLlama3() {
         if (isProcessing) return;
         isProcessing = true;
 
+        var getArgs = new GetArgs {
+            Image = "ponito/built-llama3"
+        };
+        var    http     = new HttpClient();
+        string endPoint = "/api/generate";
+        object rawObj = new {
+            model  = "llama3",
+            prompt = prompt,
+            stream = false
+        };
+
+
         await Pipe
-              .Start((
-              ctnRsp,
-              endpoint: "/api/generate",
-              postData: (object)new {
-                  model  = "llama3",
-                  prompt = prompt,
-                  stream = false
-              }))
+              .Start(Response<GetArgs>.Ok(getArgs))
+              .Pass(Docker.GetContainer)
+              .Function(ctnRsp => (ctnRsp, http, endPoint, rawObj))
               .Pass(Docker.Post)
               .FunctionAsync(async postRsp => {
                   if (postRsp.IsNotOk) {
@@ -71,7 +58,7 @@
 }
 
 <PageTitle>Llama3</PageTitle>
-<input @bind="prompt"/>
+<input @bind="prompt" style="field-sizing: content;"/>
 <button @onclick="AskLlama3">問 llama3</button>
 <p id="rsp">@rsp</p>
 

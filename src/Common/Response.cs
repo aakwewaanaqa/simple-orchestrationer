@@ -91,10 +91,10 @@ public struct Response<T> {
     /// </summary>
     /// <param name="value">想要夾帶的值 The value to response with.</param>
     /// <param name="message">想要夾帶的訊息 The message to response with.</param>
-    public static Response<T> Ok(
-        T      value   = default,
+    public static Response<U> Ok<U>(
+        U      value   = default,
         string message = "") {
-        return new Response<T> {
+        return new Response<U> {
             status    = 200,
             errorCode = 0,
             message   = message,
@@ -115,14 +115,6 @@ public struct Response<T> {
             errorCode = (int)errorCode,
             message   = message,
             value     = default,
-        };
-    }
-
-    public static implicit operator Response<T>(T value) {
-        return new Response<T> {
-            status    = 200,
-            errorCode = 0,
-            value     = value
         };
     }
 }
